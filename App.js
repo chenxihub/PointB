@@ -33,7 +33,7 @@ export default class App extends Component<{}> {
 
 const styles = StyleSheet.create({
     flex: {
-        flex: 1
+        flex: 1,
     },
     page1: {
         backgroundColor: 'red',
