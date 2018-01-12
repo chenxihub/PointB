@@ -19,15 +19,16 @@ export default class PopularPage extends Component {
         this.changeValues = [];
         this.state = {
             text: '',
-            dataArray: []
+            dataArray: [],
         };
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
     }
 
     static navigationOptions = ({ navigation }) => {
         const { state: { params }, goBack } = navigation;
+        let title = params.isRemoveKey ? 'RemoveKey' : 'KeyPage';
         return {
-            title: 'KeyPage',
+            title: title,
             headerTintColor: '#FFFFFF',
             headerStyle: {
                 backgroundColor: '#03A9F4'
@@ -75,20 +76,29 @@ export default class PopularPage extends Component {
 
     }
 
+    /***
+     *
+     * @param data
+     */
     onClick(data) {
-        data.checked = !data.checked;
+        const { state: { params: isRemoveKey } } = this.props.navigation;
+        if (!isRemoveKey) {
+            data.checked = !data.checked;
+        }
         ArrayUtils.updateArray(this.changeValues, data)
     }
 
 
     renderCheckBox(data) {
+        const { navigate, state: { params }, goBack } = this.props.navigation;
         let leftText = data.name;
+        let isChecked = params.isRemoveKey ? false : data.checked;
         return (
             <CheckBox
                 style={{ flex: 1, padding: 10 }}
                 onClick={() => this.onClick(data)}
                 leftText={leftText}
-                isChecked={data.checked}
+                isChecked={isChecked}
                 checkedImage={
                     <Image
                         style={{ tintColor: '#03A9F4' }}
@@ -111,6 +121,9 @@ export default class PopularPage extends Component {
         if (this.changeValues.length === 0) {
             goBack();
             return;
+        }
+        for (let i = 0, l = this.changeValues.length; i < l; i++) {
+            ArrayUtils.remove(this.state.dataArray, this.changeValues[i])
         }
         this.languageDao.save(this.state.dataArray);
         goBack();
@@ -145,16 +158,17 @@ export default class PopularPage extends Component {
 
     render() {
         const { navigate, state: { params }, goBack } = this.props.navigation;
+        let title = params.isRemoveKey ? 'Remove' : 'Save';
         return (
             <View style={styles.redText}>
                 <Button
-                    title='保存'
+                    title={title}
                     onPress={() => {
                         this.onBack();
                     }}
                 />
                 <Text>
-                {JSON.stringify(this.state.dataArray)}
+                    {JSON.stringify(this.state.dataArray)}
                 </Text>
                 <ScrollView>
                     {this.renderView()}

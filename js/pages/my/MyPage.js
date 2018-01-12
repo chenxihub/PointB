@@ -52,6 +52,16 @@ class MyPageHome extends Component {
                         }
                     })}
                 >标签排序</Text>
+                <Text
+                    style={styles.tips}
+                    onPress={() => navigate('KeyPage', {
+                        text: 'params',
+                        isRemoveKey: true,
+                        callback: (text) => {
+                            this.setState({})
+                        }
+                    })}
+                >标签移除</Text>
             </View>
         )
     }

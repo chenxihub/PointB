@@ -6,14 +6,11 @@
 
 import React, {Component} from 'react';
 import {
-    Platform,
     StyleSheet,
-    Text,
     View,
-    Image,
-    Button
+    DeviceEventEmitter
 } from 'react-native';
-
+import Toast, {DURATION} from 'react-native-easy-toast';
 import RootTab from './RootTab';
 
 export default class App extends Component<{}> {
@@ -22,10 +19,21 @@ export default class App extends Component<{}> {
         this.state = {}
     }
 
+    componentDidMount() {
+        this.lisener = DeviceEventEmitter.addListener('showToast', (text) => {
+            this.toast.show(text, DURATION.LENGTH_LONG)
+        })
+    }
+
+    componentWillUnmount() {
+        this.lisener && this.lisener.remove()
+    }
+
     render() {
         return (
             <View style={styles.flex}>
                 <RootTab/>
+                <Toast ref={toast => this.toast = toast}/>
             </View>
         );
     }
