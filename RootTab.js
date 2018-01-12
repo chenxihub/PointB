@@ -11,22 +11,14 @@ import {
 import {StackNavigator, TabNavigator} from 'react-navigation';
 
 import Boy from './Boy';
-import PopularPage from './js/pages/PopularPage'
+import PopularPage from './js/pages/PopularPage';
+import AsyncStorageTest from './js/common/AsyncStorageTest';
+import MyPage from './js/pages/my/MyPage';
 
-const TreddingScreen = () => (
-    <View style={styles.homeScreen}>
-        <Text>PopularScreen</Text>
-    </View>
-);
 
 const FavoriteScreen = () => (
     <View style={styles.homeScreen}>
         <Text>FavoriteScreen</Text>
-    </View>
-);
-const MyScreen = () => (
-    <View style={styles.homeScreen}>
-        <Text>MyScreen</Text>
     </View>
 );
 
@@ -44,7 +36,7 @@ const RootTabs = TabNavigator({
         },
     },
     Tredding: {
-        screen: TreddingScreen,
+        screen: AsyncStorageTest,
         navigationOptions: {
             tabBarLabel: '趋势',
             tabBarIcon: ({ tintColor, focused }) => (
@@ -68,7 +60,7 @@ const RootTabs = TabNavigator({
         },
     },
     My: {
-        screen: MyScreen,
+        screen: MyPage,
         navigationOptions: {
             tabBarLabel: '我的',
             tabBarIcon: ({ tintColor, focused }) => (

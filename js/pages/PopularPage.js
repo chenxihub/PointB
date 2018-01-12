@@ -10,6 +10,9 @@ import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-v
 import DataRepository from '../util/DataRepository';
 import RepositoryCell from '../common/RepositoryCell';
 
+import LanguageDao, {FLAG_LANGUAGE} from '../expand/LanguageDao';
+
+
 const URL = 'https://api.github.com/search/repositories?q=';
 const URL2 = 'https://api.douban.com/v2/movie/';
 const QUERY_STR = '&sort=start';
@@ -24,20 +27,46 @@ class PopularHome extends Component {
         }
     };
 
+    constructor(props) {
+        super(props);
+        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.state = {
+            languages: []
+        };
+    }
+
+
+    load() {
+        this.languageDao.fetch()
+            .then(result => {
+                this.setState({
+                    languages: result
+                })
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    componentDidMount() {
+        this.load();
+    }
+
     render() {
+        let content = this.state.languages.length > 0 ? <ScrollableTabView
+            renderTabBar={() => <ScrollableTabBar/>}
+            tabBarBackgroundColor={'#03A9F4'}
+            tabBarTextStyle={{ color: '#FFFFFF' }}
+            tabBarUnderlineStyle={{ backgroundColor: '#0288D1' }}
+        >
+            {this.state.languages.map((result, i, arr) => {
+                let lan = arr[i];
+                return lan.checked ? <PopularTab tabLabel={lan.name} key={i}>{lan.name}</PopularTab> : null
+            })}
+        </ScrollableTabView> : null;
         return (
             <View style={styles.container}>
-                <ScrollableTabView
-                    renderTabBar={() => <ScrollableTabBar/>}
-                    tabBarBackgroundColor={'#03A9F4'}
-                    tabBarTextStyle={{ color: '#FFFFFF' }}
-                    tabBarUnderlineStyle={{ backgroundColor: '#0288D1' }}
-                >
-                    <PopularTab tabLabel="JavaScript">JavaScript</PopularTab>
-                    <PopularTab tabLabel="iOS">iOS</PopularTab>
-                    <PopularTab tabLabel="Android">Android</PopularTab>
-                    <PopularTab tabLabel="Java">js</PopularTab>
-                </ScrollableTabView>
+                {content}
             </View>
         )
     }
@@ -49,8 +78,7 @@ class PopularTab extends Component {
         this.state = {
             result: '',
             dataSource: new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 }),
-            isLoading: false
-
+            isLoading: false,
         };
         this.dataRepository = new DataRepository;
     }
