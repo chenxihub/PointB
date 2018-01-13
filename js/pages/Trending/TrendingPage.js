@@ -91,6 +91,9 @@ class TrendingPage extends Component {
                     barStyle="light-content"
                 />
                 {content}
+                {timeSpanTextArray.map((result, i, arr) => {
+                    return (<TouchableOpacity key={i}><Text>{arr[i].showText}</Text></TouchableOpacity>)
+                })}
             </View>
         )
     }

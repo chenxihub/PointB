@@ -37,7 +37,7 @@ class MyPageHome extends Component {
                 <Text
                     style={styles.tips}
                     onPress={() => navigate('KeyPage', {
-                        text: 'params',
+                        isCustomerKey: true,
                         callback: (text) => {
                             this.setState({})
                         }
@@ -46,7 +46,6 @@ class MyPageHome extends Component {
                 <Text
                     style={styles.tips}
                     onPress={() => navigate('SortKeyPage', {
-                        text: 'params',
                         callback: (text) => {
                             this.setState({})
                         }
@@ -55,11 +54,8 @@ class MyPageHome extends Component {
                 <Text
                     style={styles.tips}
                     onPress={() => navigate('KeyPage', {
-                        text: 'params',
                         isRemoveKey: true,
-                        callback: (text) => {
-                            this.setState({})
-                        }
+                        ...this.props
                     })}
                 >标签移除</Text>
             </View>

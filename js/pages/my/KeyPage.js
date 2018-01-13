@@ -13,7 +13,7 @@ import LanguageDao, {FLAG_LANGUAGE} from '../../expand/LanguageDao';
 import ArrayUtils from '../../util/ArrayUtils';
 
 
-export default class PopularPage extends Component {
+export default class KeyPage extends Component {
     constructor(props) {
         super(props);
         this.changeValues = [];
@@ -26,7 +26,7 @@ export default class PopularPage extends Component {
 
     static navigationOptions = ({ navigation }) => {
         const { state: { params }, goBack } = navigation;
-        let title = params.isRemoveKey ? 'RemoveKey' : 'KeyPage';
+        let title = params.isRemoveKey ? 'RemoveKey' : 'CustomerKeyPage';
         return {
             title: title,
             headerTintColor: '#FFFFFF',
@@ -36,17 +36,80 @@ export default class PopularPage extends Component {
         };
     };
 
+    componentDidMount() {
+        this.loadData();
+    }
 
     loadData() {
-        this.languageDao.fetch()
-            .then(result => {
-                this.setState({
-                    dataArray: result
-                })
+        this.languageDao.fetch().then((data) => {
+            this.setState({
+                dataArray: data
             })
-            .catch(error => {
-                console.log(error)
-            })
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    /***
+     *
+     * @param data
+     */
+    onClick(data) {
+        const { state: { params } } = this.props.navigation;
+        if (params.isCustomerKey) {
+            data.checked = !data.checked;
+        }
+        ArrayUtils.updateArray(this.changeValues, data)
+    }
+
+
+    onSave() {
+        const { state: { params }, goBack } = this.props.navigation;
+        if (this.changeValues.length === 0) {
+            goBack();
+            return;
+        }
+        if (params.isRemoveKey) {
+            // alert(params.isRemoveKey);
+            for (let i = 0, l = this.changeValues.length; i < l; i++) {
+                ArrayUtils.remove(this.state.dataArray, this.changeValues[i]);
+            }
+        } else if (params.isCustomerKey) {
+            // alert(params.isCustomerKey);
+            this.languageDao.save(this.state.dataArray);
+        }
+        this.languageDao.save(this.state.dataArray);
+        // alert(JSON.stringify(this.state.dataArray))
+        goBack();
+
+    }
+
+    onBack() {
+        const { navigate, state: { params }, goBack } = this.props.navigation;
+        if (this.changeValues.length > 0) {
+            // iOS和Android上都可用
+            Alert.alert(
+                '提示',
+                '要保存修改吗？',
+                [
+                    {
+                        text: '取消', onPress: () => {
+                            goBack();
+                        }, style: 'cancel'
+                    },
+                    {
+                        text: '确定', onPress: () => {
+                            this.onSave()
+                        }
+                    },
+                ],
+                { cancelable: false }
+            )
+
+        } else {
+            goBack();
+            return;
+        }
     }
 
     renderView() {
@@ -71,26 +134,13 @@ export default class PopularPage extends Component {
                     {this.renderCheckBox(this.state.dataArray[len - 1])}
                 </View>
             </View>
-        );
+        )
         return views;
 
     }
 
-    /***
-     *
-     * @param data
-     */
-    onClick(data) {
-        const { state: { params: isRemoveKey } } = this.props.navigation;
-        if (!isRemoveKey) {
-            data.checked = !data.checked;
-        }
-        ArrayUtils.updateArray(this.changeValues, data)
-    }
-
-
     renderCheckBox(data) {
-        const { navigate, state: { params }, goBack } = this.props.navigation;
+        const { state: { params } } = this.props.navigation;
         let leftText = data.name;
         let isChecked = params.isRemoveKey ? false : data.checked;
         return (
@@ -116,45 +166,6 @@ export default class PopularPage extends Component {
         )
     }
 
-    onSave() {
-        const { navigate, state: { params }, goBack } = this.props.navigation;
-        if (this.changeValues.length === 0) {
-            goBack();
-            return;
-        }
-        for (let i = 0, l = this.changeValues.length; i < l; i++) {
-            ArrayUtils.remove(this.state.dataArray, this.changeValues[i])
-        }
-        this.languageDao.save(this.state.dataArray);
-        goBack();
-    }
-
-    onBack() {
-        const { navigate, state: { params }, goBack } = this.props.navigation;
-        if (this.changeValues === 0) {
-            goBack();
-            return;
-        } else {
-            // iOS和Android上都可用
-            Alert.alert(
-                '提示',
-                '要保存修改吗？',
-                [
-                    {
-                        text: '取消', onPress: () => {
-                            goBack();
-                        }, style: 'cancel'
-                    },
-                    { text: '确定', onPress: () => this.onSave() },
-                ],
-                { cancelable: false }
-            )
-        }
-    }
-
-    componentDidMount() {
-        this.loadData();
-    }
 
     render() {
         const { navigate, state: { params }, goBack } = this.props.navigation;
