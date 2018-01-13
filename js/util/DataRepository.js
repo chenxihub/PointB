@@ -9,7 +9,16 @@ import {
     AsyncStorage,
 } from 'react-native';
 
+import gitHubTrending from 'GitHubTrending'
+
+export let FLAG_STORAGE = { flag_popular: 'popular', flag_trending: 'trending' };
+
 export default class DataRepository {
+    constructor(flag) {
+        this.flag = flag;
+        if (flag === FLAG_STORAGE.flag_trending) this.trending = new gitHubTrending();
+    }
+
     /**
      * 获取网络数据，本地数据，数据库缓存
      * @param url
@@ -72,19 +81,33 @@ export default class DataRepository {
      */
     fetchNetRepository(url) {
         return new Promise((resolve, reject) => {
-            fetch(url)
-                .then(response => response.json())
-                .then(result => {
-                    if (!result) {
-                        resolve(new Error('RepositoryData a is null'));
-                        return
-                    }
-                    resolve(result.items);
-                    this.saveRepository(url, result.items)
-                })
-                .catch(error => {
-                    reject(error);
-                })
+            if (this.flag === FLAG_STORAGE.flag_trending) {
+                this.trending.fetchTrending(url)
+                    .then(result => {
+                        if (!result) {
+                            reject(new Error('RepositoryData a is null'));
+                            return;
+                        } else {
+                            this.saveRepository(url, result);
+                            resolve(result);
+                        }
+                    })
+            } else {
+                fetch(url)
+                    .then(response => response.json())
+                    .then(result => {
+                        if (!result) {
+                            resolve(new Error('RepositoryData a is null'));
+                            return
+                        }
+                        resolve(result.items);
+                        this.saveRepository(url, result.items)
+                    })
+                    .catch(error => {
+                        reject(error);
+                    })
+            }
+
         })
     }
 
@@ -107,7 +130,7 @@ export default class DataRepository {
      */
 
     checkDate(longTime) {
-        // return false;
+        return false;
         let cDate = new Date();
         let tDate = new Date();
         tDate.setTime(longTime);

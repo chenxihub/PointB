@@ -15,6 +15,7 @@ import PopularPage from './js/pages/PopularPage';
 import AsyncStorageTest from './js/common/AsyncStorageTest';
 import MyPage from './js/pages/my/MyPage';
 import WebViewTest from './WebViewTest'
+import TrendingPage from './js/pages/Trending/TrendingPage'
 
 const RootTabs = TabNavigator({
     Popular: {
@@ -30,7 +31,7 @@ const RootTabs = TabNavigator({
         },
     },
     Tredding: {
-        screen: AsyncStorageTest,
+        screen: TrendingPage,
         navigationOptions: {
             tabBarLabel: '趋势',
             tabBarIcon: ({ tintColor, focused }) => (

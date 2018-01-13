@@ -1,3 +1,7 @@
+/**
+ * @AsyncStorage 的数据的存储，清楚，获取
+ *
+ */
 import React, {Component} from 'react';
 import {
     Text,
@@ -22,6 +26,9 @@ class AsyncStoragePage extends Component {
     };
 
     onSave() {
+        /**
+         * setItem (关键字，存储的内容，回调函数)
+         */
         AsyncStorage.setItem('KEY', this.text, (error) => {
             if (!error) {
                 this.toast.show('保存成功', DURATION.LENGTH_LONG);
@@ -32,6 +39,9 @@ class AsyncStoragePage extends Component {
     }
 
     onRemove() {
+        /**
+         * setItem (关键字，回调函数)
+         */
         AsyncStorage.removeItem('KEY', (error) => {
 
             if (!error) {
@@ -43,6 +53,9 @@ class AsyncStoragePage extends Component {
     }
 
     OnFetch() {
+        /**
+         * setItem (关键字，回调函数（错误，结果））)
+         */
         AsyncStorage.getItem('KEY', (error, result) => {
             if (!error) {
                 if (result !== '' && result !== null) {

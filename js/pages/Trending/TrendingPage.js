@@ -5,33 +5,52 @@ import {
     ListView,
     RefreshControl,
     DeviceEventEmitter,
-    StatusBar
+    StatusBar,
+    TouchableHighlight,
+    TouchableOpacity,
+    Text
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
-import DataRepository, {FLAG_STORAGE} from '../util/DataRepository';
-import RepositoryCell from '../common/RepositoryCell';
-import LanguageDao, {FLAG_LANGUAGE} from '../expand/LanguageDao';
-import RepositoryDetail from './RepositoryDetail'
+//获取数据（包含本地，网络，数据库）
+import DataRepository, {FLAG_STORAGE} from '../../util/DataRepository';
+//通用类
+import TrendingCell from '../../common/TrendingCell';
+//获取本地Json标签或者数据库标签
+import LanguageDao, {FLAG_LANGUAGE} from '../../expand/LanguageDao';
+//详情页
+import RepositoryDetail from '../RepositoryDetail'
+//弹出层
+//TimeSpan方法
+import TimeSpan from '../../model/TimeSpan'
 
-const URL = 'https://api.github.com/search/repositories?q=';
-const QUERY_STR = '&sort=start';
 
-class PopularHome extends Component {
-    static navigationOptions = {
-        title: 'Popular',
-        //deep:#0288D1  red:#FF5252
-        headerTintColor: '#FFFFFF',
-        headerStyle: {
-            backgroundColor: '#03A9F4'
-        }
+let timeSpanTextArray = [new TimeSpan('今天', 'since = daily'),
+    new TimeSpan('本周', 'since = Weekly'),
+    new TimeSpan('本月', 'since = monthly')];
+
+const API_URL = 'https://github.com/trending/';
+
+class TrendingPage extends Component {
+    static navigationOptions = ({ navigation }) => {
+        let title = 'Trending';
+        return {
+            title: title,
+            headerTintColor: '#FFFFFF',
+            headerStyle: {
+                backgroundColor: '#03A9F4'
+            },
+        };
     };
+
 
     constructor(props) {
         super(props);
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_language);
         this.state = {
-            languages: []
+            languages: [],
+            isVisible: false,
+            buttonRect: {},
         };
     }
 
@@ -62,7 +81,7 @@ class PopularHome extends Component {
             {this.state.languages.map((result, i, arr) => {
                 let lan = arr[i];
                 return lan.checked ?
-                    <PopularTab tabLabel={lan.name} key={i} {...this.props}>{lan.name}</PopularTab> : null
+                    <TrendingTab tabLabel={lan.name} key={i} {...this.props}>{lan.name}</TrendingTab> : null
             })}
         </ScrollableTabView> : null;
         return (
@@ -77,7 +96,7 @@ class PopularHome extends Component {
     }
 }
 
-class PopularTab extends Component {
+class TrendingTab extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -85,11 +104,11 @@ class PopularTab extends Component {
             dataSource: new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 }),
             isLoading: false,
         };
-        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular);
+        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_trending);
     }
 
     loadData() {
-        let url = URL + this.props.tabLabel + QUERY_STR;
+        let url = this.getFetchUrl('?since=daily', this.props.tabLabel);
         this.setState({
             isLoading: true
         });
@@ -125,15 +144,18 @@ class PopularTab extends Component {
             })
     };
 
+    getFetchUrl(timeSpan, category) {
+        return API_URL + category + '?' + timeSpan.searchText
+    }
+
     componentDidMount() {
         this.loadData();
     }
 
 
     renderRowData(data) {
-        console.log(data);
         return (
-            <RepositoryCell
+            <TrendingCell
                 data={data}
                 key={data.id}
                 onSelect={() => this.onSelect(data)}
@@ -174,7 +196,7 @@ class PopularTab extends Component {
 
 const StartNavigator = StackNavigator({
     Home: {
-        screen: PopularHome,
+        screen: TrendingPage,
     },
     RepositoryDetail: {
         screen: RepositoryDetail
@@ -198,5 +220,15 @@ const styles = StyleSheet.create({
     },
     redText: {
         height: 600
-    }
+    },
+    button: {
+        borderRadius: 4,
+        padding: 10,
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#ccc',
+        borderColor: '#333',
+        borderWidth: 1,
+    },
+    buttonText: {}
 });

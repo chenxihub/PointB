@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 
-const URL = 'https://www.baidu.com';
+let Trending_URL = 'https://github.com/';
 
-export default class WebViewTest extends Component {
+export default class RepositoryDetail extends Component {
     constructor(props) {
         super(props);
-        this.url = this.props.navigation.state.params.data.html_url;
+        this.url = this.props.navigation.state.params.data.html_url ? this.props.navigation.state.params.data.html_url
+            : Trending_URL + this.props.navigation.state.params.data.fullName;
         this.state = {
             url: this.url,
             canGoBack: false,
@@ -23,7 +24,8 @@ export default class WebViewTest extends Component {
     }
 
     static navigationOptions = ({ navigation }) => {
-        let title = navigation.state.params.data.full_name;
+        let title = navigation.state.params.data.full_name ? navigation.state.params.data.full_name
+            : navigation.state.params.data.fullName;
         return {
             title: title,
             headerTintColor: '#FFFFFF',
