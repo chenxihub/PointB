@@ -4,17 +4,17 @@ import {
     View,
     ListView,
     RefreshControl,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    StatusBar
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import DataRepository from '../util/DataRepository';
 import RepositoryCell from '../common/RepositoryCell';
 import LanguageDao, {FLAG_LANGUAGE} from '../expand/LanguageDao';
-
+import RepositoryDetail from './RepositoryDetail'
 
 const URL = 'https://api.github.com/search/repositories?q=';
-const URL2 = 'https://api.douban.com/v2/movie/';
 const QUERY_STR = '&sort=start';
 
 class PopularHome extends Component {
@@ -61,11 +61,16 @@ class PopularHome extends Component {
         >
             {this.state.languages.map((result, i, arr) => {
                 let lan = arr[i];
-                return lan.checked ? <PopularTab tabLabel={lan.name} key={i}>{lan.name}</PopularTab> : null
+                return lan.checked ?
+                    <PopularTab tabLabel={lan.name} key={i} {...this.props}>{lan.name}</PopularTab> : null
             })}
         </ScrollableTabView> : null;
         return (
             <View style={styles.container}>
+                <StatusBar
+                    backgroundColor="white"
+                    barStyle="light-content"
+                />
                 {content}
             </View>
         )
@@ -88,35 +93,6 @@ class PopularTab extends Component {
         this.setState({
             isLoading: true
         });
-        // this.dataRepository.fetchRepository(url)
-        //     .then(result => {
-        //         let items = result && result.items ? result.items : result ? result : [];
-        //         this.setState({
-        //             dataSource: this.state.dataSource.cloneWithRows(items),
-        //             isLoading: false,
-        //         });
-        //         if (result && result.update_data && this.dataRepository.checkData(result.update_data)) {
-        //             DeviceEventEmitter.emit('showToast', '数据过时');
-        //             return this.dataRepository.fetchNetRepository(url);
-        //         } else {
-        //             DeviceEventEmitter.emit('showToast', '显示本地数据');
-        //         }
-        //     })
-        //     .then(
-        //         items => {
-        //             if (!items || items.length === 0) return;
-        //             this.setState({
-        //                 dataSource: this.state.dataSource.cloneWithRows(items)
-        //             });
-        //             DeviceEventEmitter.emit('showToast', '显示缓存数据');
-        //         }
-        //     )
-        //
-        //     .catch(error => {
-        //         this.setState({
-        //             result: JSON.stringify(error)
-        //         })
-        //     })
         this.dataRepository
             .fetchRepository(url)
             .then(result => {
@@ -129,7 +105,7 @@ class PopularTab extends Component {
                 if (result && result.update_date && !this.dataRepository.checkDate(result.update_date)) {
                     DeviceEventEmitter.emit('showToast', '数据过时');
                     return this.dataRepository.fetchNetRepository(url);
-                }else {
+                } else {
                     DeviceEventEmitter.emit('showToast', '显示缓存数据');
                 }
 
@@ -153,10 +129,25 @@ class PopularTab extends Component {
         this.loadData();
     }
 
+
     renderRowData(data) {
+        console.log(data);
         return (
-            <RepositoryCell data={data}/>
+            <RepositoryCell
+                data={data}
+                key={data.id}
+                onSelect={() => this.onSelect(data)}
+                {...this.props}
+            />
         )
+    }
+
+    onSelect(data) {
+        const { navigate } = this.props.navigation;
+        navigate('RepositoryDetail', {
+            data: data
+        });
+
     }
 
     render() {
@@ -185,16 +176,14 @@ const StartNavigator = StackNavigator({
     Home: {
         screen: PopularHome,
     },
+    RepositoryDetail: {
+        screen: RepositoryDetail
+    }
+
 });
 
 
-export default class PopularPage extends Component {
-    render() {
-        return (
-            <StartNavigator/>
-        )
-    }
-}
+export default StartNavigator;
 
 
 const styles = StyleSheet.create({

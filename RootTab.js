@@ -14,13 +14,7 @@ import Boy from './Boy';
 import PopularPage from './js/pages/PopularPage';
 import AsyncStorageTest from './js/common/AsyncStorageTest';
 import MyPage from './js/pages/my/MyPage';
-
-
-const FavoriteScreen = () => (
-    <View style={styles.homeScreen}>
-        <Text>FavoriteScreen</Text>
-    </View>
-);
+import WebViewTest from './WebViewTest'
 
 const RootTabs = TabNavigator({
     Popular: {
@@ -48,7 +42,7 @@ const RootTabs = TabNavigator({
         },
     },
     Favorite: {
-        screen: FavoriteScreen,
+        screen: WebViewTest,
         navigationOptions: {
             tabBarLabel: '收藏',
             tabBarIcon: ({ tintColor, focused }) => (
@@ -73,13 +67,7 @@ const RootTabs = TabNavigator({
     },
 });
 
-export default class RootTab extends Component {
-    render() {
-        return (
-            <RootTabs/>
-        )
-    }
-}
+export default RootTabs;
 
 const styles = StyleSheet.create({
     flex: {

@@ -11,7 +11,10 @@ import {
 export default class RepositoryCell extends Component {
     render() {
         return (
-            <TouchableOpacity style={styles.container}>
+            <TouchableOpacity
+                style={styles.container}
+                onPress={this.props.onSelect}
+            >
                 <View style={styles.cell_container}>
                     <Text style={styles.header}>{this.props.data.full_name}</Text>
                     <Text style={styles.description}>{this.props.data.description}</Text>
@@ -30,7 +33,7 @@ export default class RepositoryCell extends Component {
                         <View>
                             <Image
                                 source={require('../../res/images/my/My_coin_icon.png')}
-                                style={{ width: 16, height: 16 ,marginTop:5}}
+                                style={{ width: 16, height: 16, marginTop: 5 }}
                             />
                         </View>
                     </View>
