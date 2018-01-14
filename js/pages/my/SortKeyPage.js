@@ -15,7 +15,7 @@ import ArrayUtils from "../../util/ArrayUtils";
 
 export default class SortKeyPage extends Component {
     static navigationOptions = ({ navigation }) => {
-        const { state: { params }, goBack } = navigation;
+        const { state: { params }} = navigation;
         let title = params.flag === FLAG_LANGUAGE.flag_key ? '标签排序' : '语言排序';
         return {
             title: title,
