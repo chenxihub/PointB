@@ -10,11 +10,22 @@ import {
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import SortableListView from 'react-native-sortable-listview'
-import KeyPage from '../pages/my/KeyPage';
-import LanguageDao, {FLAG_LANGUAGE} from "../expand/LanguageDao";
-import ArrayUtils from "../util/ArrayUtils";
+import LanguageDao, {FLAG_LANGUAGE} from "../../expand/LanguageDao";
+import ArrayUtils from "../../util/ArrayUtils";
 
 export default class SortKeyPage extends Component {
+    static navigationOptions = ({ navigation }) => {
+        const { state: { params }, goBack } = navigation;
+        let title = params.flag === FLAG_LANGUAGE.flag_key ? '标签排序' : '语言排序';
+        return {
+            title: title,
+            headerTintColor: '#FFFFFF',
+            headerStyle: {
+                backgroundColor: '#03A9F4'
+            },
+        };
+    };
+
     constructor(props) {
         super(props);
         this.dataArray = [];
@@ -25,19 +36,8 @@ export default class SortKeyPage extends Component {
         }
     }
 
-    static navigationOptions = ({ navigation }) => {
-        const { state: { params }, goBack } = navigation;
-        return {
-            title: 'SortKeyPage',
-            headerTintColor: '#FFFFFF',
-            headerStyle: {
-                backgroundColor: '#03A9F4'
-            },
-        };
-    };
-
     componentDidMount() {
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.languageDao = new LanguageDao(this.props.navigation.state.params.flag);
         this.loadData();
     }
 
@@ -146,7 +146,7 @@ class SortCell extends Component {
             >
                 <View style={styles.row}>
                     <Image
-                        source={require('./my/checked/ic_sort.png')}
+                        source={require('./checked/ic_sort.png')}
                     />
                     <Text>{this.props.data.name}</Text>
                 </View>

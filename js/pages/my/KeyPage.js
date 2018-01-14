@@ -12,21 +12,11 @@ import CheckBox from 'react-native-check-box';
 import LanguageDao, {FLAG_LANGUAGE} from '../../expand/LanguageDao';
 import ArrayUtils from '../../util/ArrayUtils';
 
-
 export default class KeyPage extends Component {
-    constructor(props) {
-        super(props);
-        this.changeValues = [];
-        this.state = {
-            text: '',
-            dataArray: [],
-        };
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
-    }
-
     static navigationOptions = ({ navigation }) => {
         const { state: { params }, goBack } = navigation;
         let title = params.isRemoveKey ? 'RemoveKey' : 'CustomerKeyPage';
+        title = params.flag === FLAG_LANGUAGE.flag_language ? '自定义语言' : title;
         return {
             title: title,
             headerTintColor: '#FFFFFF',
@@ -35,6 +25,17 @@ export default class KeyPage extends Component {
             },
         };
     };
+
+    constructor(props) {
+        super(props);
+        this.changeValues = [];
+        this.state = {
+            text: '',
+            dataArray: [],
+        };
+        this.languageDao = new LanguageDao(this.props.navigation.state.params.flag);
+    }
+
 
     componentDidMount() {
         this.loadData();
@@ -178,10 +179,10 @@ export default class KeyPage extends Component {
                         this.onBack();
                     }}
                 />
-                <Text>
-                    {JSON.stringify(this.state.dataArray)}
-                </Text>
                 <ScrollView>
+                    <Text>
+                        {JSON.stringify(this.state.dataArray)}
+                    </Text>
                     {this.renderView()}
                 </ScrollView>
             </View>

@@ -6,9 +6,8 @@ import {
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import KeyPage from './KeyPage';
-import LanguageDao, {FLAG_LANGUAGE} from "../../expand/LanguageDao";
-import ArrayUtils from "../../util/ArrayUtils";
-import SortKeyPage from '../../pages/SortKeyPage'
+import {FLAG_LANGUAGE} from "../../expand/LanguageDao";
+import SortKeyPage from './SortKeyPage'
 
 class MyPageHome extends Component {
     constructor(props) {
@@ -18,7 +17,7 @@ class MyPageHome extends Component {
             text: '',
             dataArray: []
         };
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        // this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
     }
 
     static navigationOptions = {
@@ -38,23 +37,37 @@ class MyPageHome extends Component {
                     style={styles.tips}
                     onPress={() => navigate('KeyPage', {
                         isCustomerKey: true,
-                        callback: (text) => {
-                            this.setState({})
-                        }
+                        ...this.props,
+                        flag: FLAG_LANGUAGE.flag_key,
                     })}
                 >自定义标签页</Text>
                 <Text
                     style={styles.tips}
+                    onPress={() => navigate('KeyPage', {
+                        isCustomerKey: true,
+                        flag: FLAG_LANGUAGE.flag_language,
+                        ...this.props
+                    })}
+                >自定义语言</Text>
+                <Text
+                    style={styles.tips}
                     onPress={() => navigate('SortKeyPage', {
-                        callback: (text) => {
-                            this.setState({})
-                        }
+                        ...this.props,
+                        flag: FLAG_LANGUAGE.flag_key
                     })}
                 >标签排序</Text>
                 <Text
                     style={styles.tips}
+                    onPress={() => navigate('SortKeyPage', {
+                        ...this.props,
+                        flag: FLAG_LANGUAGE.flag_language
+                    })}
+                >语言排序</Text>
+                <Text
+                    style={styles.tips}
                     onPress={() => navigate('KeyPage', {
                         isRemoveKey: true,
+                        flag: FLAG_LANGUAGE.flag_language,
                         ...this.props
                     })}
                 >标签移除</Text>
@@ -77,13 +90,7 @@ const StartNavigator = StackNavigator({
 });
 
 
-export default class MyPage extends Component {
-    render() {
-        return (
-            <StartNavigator/>
-        )
-    }
-}
+export default StartNavigator;
 
 
 const styles = StyleSheet.create({
