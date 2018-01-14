@@ -5,14 +5,23 @@ import {
     ListView,
     RefreshControl,
     DeviceEventEmitter,
-    StatusBar
+    StatusBar,
+    Text
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
 import DataRepository, {FLAG_STORAGE} from '../util/DataRepository';
+import Utils from '../util/Utils';
 import RepositoryCell from '../common/RepositoryCell';
 import LanguageDao, {FLAG_LANGUAGE} from '../expand/LanguageDao';
 import RepositoryDetail from './RepositoryDetail'
+
+import ProjectModel from '../model/ProjectModel'
+
+import FavoriteDao from '../expand/FavoriteDao';
+import {DURATION} from "react-native-easy-toast";
+
+let favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
 
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=start';
@@ -80,12 +89,52 @@ class PopularHome extends Component {
 class PopularTab extends Component {
     constructor(props) {
         super(props);
+        // this.isFavoriteChanged = false;
         this.state = {
             result: '',
             dataSource: new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 }),
             isLoading: false,
+            favoriteKeys: [],
+            isFavoriteChanged: false,
         };
         this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular);
+    }
+
+    /**
+     * 更新project的每一项的收藏状态
+     */
+    flushFavoriteState() {
+        let projectModels = [];
+        let items = this.items;
+        for (let i = 0, len = items.length; i < len; i++) {
+            projectModels.push(new ProjectModel(items[i], Utils.checkFavorite(items[i], this.state.favoriteKeys)))
+        }
+        this.updateState({
+            isLoading: false,
+            dataSource: this.getDataSourceWay(projectModels)
+        })
+
+    }
+
+    getDataSourceWay(items) {
+        return this.state.dataSource.cloneWithRows(items);
+    }
+
+    getFavoriteKeys() {
+        favoriteDao.getFavoriteKeys()
+            .then(keys => {
+                if (keys) {
+                    this.updateState({ favoriteKeys: keys })
+                }
+                this.flushFavoriteState();
+            }).catch((error) => {
+            this.flushFavoriteState()
+        })
+    }
+
+    updateState(dic) {
+        if (!this) return;
+        this.setState(dic)
     }
 
     loadData() {
@@ -96,11 +145,12 @@ class PopularTab extends Component {
         this.dataRepository
             .fetchRepository(url)
             .then(result => {
-                let items = result && result.items ? result.items : result ? result : [];
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
-                    isLoading: false
-                });
+                this.items = result && result.items ? result.items : result ? result : [];
+                // this.setState({
+                //     dataSource: this.state.dataSource.cloneWithRows(items),
+                //     isLoading: false
+                // });
+                this.getFavoriteKeys();
 
                 if (result && result.update_date && !this.dataRepository.checkDate(result.update_date)) {
                     DeviceEventEmitter.emit('showToast', '数据过时');
@@ -112,40 +162,83 @@ class PopularTab extends Component {
             })
             .then((items) => {
                 if (!items || items.length === 0) return;
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
-                });
+                this.items = items;
+                // this.setState({
+                //     dataSource: this.state.dataSource.cloneWithRows(items),
+                // });
+                this.getFavoriteKeys();
                 DeviceEventEmitter.emit('showToast', '显示网络数据');
             })
             .catch(error => {
                 console.log(error);
-                this.setState({
+                this.updateState({
                     isLoading: false
                 });
             })
     };
 
     componentDidMount() {
+        this.lisener = DeviceEventEmitter.addListener('favoriteChanged_popular', () => {
+            this.setState({
+                isFavoriteChanged: true
+            })
+            // .isFavoriteChanged = true;
+        });
         this.loadData();
     }
 
+    componentWillUnmount() {
+        if (this.listener) {
+            this.listener.remove();
+        }
+    }
 
-    renderRowData(data) {
-        console.log(data);
+    componentWillReceiveProps(nextProps) {
+        if (this.state.isFavoriteChanged) {
+            // this.isFavoriteChanged = false;
+            this.setState({
+                isFavoriteChanged: false
+            });
+            this.getFavoriteKeys();
+        }
+    }
+
+    renderRowData(projectModel) {
+        console.log(projectModel);
         return (
             <RepositoryCell
-                data={data}
-                key={data.id}
-                onSelect={() => this.onSelect(data)}
+                projectModel={projectModel}
+                key={projectModel.item.id}
+                onSelect={() => this.onSelect(projectModel)}
+                onFavorite={(item, isFavorite) => this.onFavorite(item, isFavorite)}
                 {...this.props}
             />
         )
     }
 
-    onSelect(data) {
+    /**
+     * FavoriteIcon的单击回调函数
+     * @param item
+     * @param isFavorite
+     */
+    onFavorite(item, isFavorite) {
+        if (isFavorite) {
+            favoriteDao.saveFavoriteItem(item.id.toString(), JSON.stringify(item))
+        } else {
+            favoriteDao.removeFavoriteKeys(item.id.toString())
+        }
+    }
+
+    onSelect(projectModel) {
         const { navigate } = this.props.navigation;
         navigate('RepositoryDetail', {
-            data: data
+            data: projectModel,
+            flag: FLAG_STORAGE.flag_popular,
+            callback: (value) => {
+                this.setState({
+                    isFavoriteChanged: value
+                })
+            }
         });
 
     }

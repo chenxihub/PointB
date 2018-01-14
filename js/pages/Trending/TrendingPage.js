@@ -24,12 +24,20 @@ import RepositoryDetail from '../RepositoryDetail'
 //TimeSpan方法
 import TimeSpan from '../../model/TimeSpan'
 
+import ProjectModel from '../../model/ProjectModel'
+
+import FavoriteDao from '../../expand/FavoriteDao';
+
+import Utils from "../../util/Utils";
+
 
 let timeSpanTextArray = [new TimeSpan('今天', 'since = daily'),
     new TimeSpan('本周', 'since = Weekly'),
     new TimeSpan('本月', 'since = monthly')];
 
 const API_URL = 'https://github.com/trending/';
+let dataRepository = new DataRepository(FLAG_STORAGE.flag_trending);
+let favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 
 class TrendingPage extends Component {
     static navigationOptions = ({ navigation }) => {
@@ -121,39 +129,95 @@ class TrendingTab extends Component {
             result: '',
             dataSource: new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 }),
             isLoading: false,
+            favoriteKeys: [],
+            isFavoriteChanged: false,
         };
-        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_trending);
+
     }
 
     componentDidMount() {
+        this.lisener = DeviceEventEmitter.addListener('favoriteChanged_popular', () => {
+            this.setState({
+                isFavoriteChanged: true
+            })
+            // .isFavoriteChanged = true;
+        });
         this.loadData(this.props.timeSpan, true);
     }
 
+    componentWillUnmount() {
+        if (this.listener) {
+            this.listener.remove();
+        }
+    }
+
     componentWillReceiveProps(nextProps) {
+        if (this.state.isFavoriteChanged) {
+            // this.isFavoriteChanged = false;
+            this.setState({
+                isFavoriteChanged: false
+            });
+            this.getFavoriteKeys();
+        }
         if (nextProps.timeSpan !== this.props.timeSpan) {
             this.loadData(nextProps.timeSpan)
         }
 
+
+    }
+
+    /**
+     * 更新project的每一项的收藏状态
+     */
+    flushFavoriteState() {
+        let projectModels = [];
+        let items = this.items;
+        for (let i = 0, len = items.length; i < len; i++) {
+            projectModels.push(new ProjectModel(items[i], Utils.checkFavorite(items[i], this.state.favoriteKeys)))
+        }
+        this.updateState({
+            isLoading: false,
+            dataSource: this.getDataSourceWay(projectModels)
+        })
+
+    }
+
+    getDataSourceWay(items) {
+        return this.state.dataSource.cloneWithRows(items);
+    }
+
+    getFavoriteKeys() {
+        favoriteDao.getFavoriteKeys()
+            .then(keys => {
+                if (keys) {
+                    this.updateState({ favoriteKeys: keys })
+                }
+                this.flushFavoriteState();
+            }).catch((error) => {
+            this.flushFavoriteState()
+        })
+    }
+
+    updateState(dic) {
+        if (!this) return;
+        this.setState(dic)
     }
 
     loadData(timeSpan, isRefresh) {
-        alert(JSON.stringify(timeSpan));
+        // alert(JSON.stringify(timeSpan));
         let url = this.getFetchUrl(timeSpan, this.props.tabLabel);
         this.setState({
             isLoading: true
         });
-        this.dataRepository
+        dataRepository
             .fetchRepository(url)
             .then(result => {
-                let items = result && result.items ? result.items : result ? result : [];
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
-                    isLoading: false
-                });
+                this.items = result && result.items ? result.items : result ? result : [];
+                this.getFavoriteKeys();
 
-                if (result && result.update_date && !this.dataRepository.checkDate(result.update_date)) {
+                if (!this.items || isRefresh && result.update_date && !dataRepository.checkDate(result.update_date)) {
                     DeviceEventEmitter.emit('showToast', '数据过时');
-                    return this.dataRepository.fetchNetRepository(url);
+                    return dataRepository.fetchNetRepository(url);
                 } else {
                     DeviceEventEmitter.emit('showToast', '显示缓存数据');
                 }
@@ -161,22 +225,26 @@ class TrendingTab extends Component {
             })
             .then((items) => {
                 if (!items || items.length === 0) return;
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
-                });
+                this.getFavoriteKeys();
                 DeviceEventEmitter.emit('showToast', '显示网络数据');
             })
             .catch(error => {
                 console.log(error);
-                this.setState({
+                this.updateState({
                     isLoading: false
                 });
             })
-    };
+    }
+    ;
+
+    updateState(dic) {
+        if (!this) return;
+        this.setState(dic)
+    }
 
     onRefreshData() {
-        alert(JSON.stringify(this.props.timeSpan))
-        this.loadData(this.props.timeSpan)
+        // alert(JSON.stringify(this.props.timeSpan))
+        this.loadData(this.props.timeSpan, true)
     }
 
     getFetchUrl(timeSpan, category) {
@@ -184,21 +252,42 @@ class TrendingTab extends Component {
     }
 
 
-    renderRowData(data) {
+    renderRowData(projectModel) {
+        // console.log(projectModel);
         return (
             <TrendingCell
-                data={data}
-                key={data.id}
-                onSelect={() => this.onSelect(data)}
+                projectModel={projectModel}
+                key={projectModel.item.fullName}
+                onSelect={() => this.onSelect(projectModel)}
+                onFavorite={(item, isFavorite) => this.onFavorite(item, isFavorite)}
                 {...this.props}
             />
         )
     }
 
-    onSelect(data) {
+    /**
+     * FavoriteIcon的单击回调函数
+     * @param item
+     * @param isFavorite
+     */
+    onFavorite(item, isFavorite) {
+        if (isFavorite) {
+            favoriteDao.saveFavoriteItem(item.fullName, JSON.stringify(item))
+        } else {
+            favoriteDao.removeFavoriteKeys(item.fullName)
+        }
+    }
+
+    onSelect(projectModel) {
         const { navigate } = this.props.navigation;
         navigate('RepositoryDetail', {
-            data: data
+            data: projectModel,
+            flag: FLAG_STORAGE.flag_trending,
+            callback: (value) => {
+                this.setState({
+                    isFavoriteChanged: value
+                })
+            }
         });
 
     }
@@ -225,52 +314,54 @@ class TrendingTab extends Component {
     }
 }
 
-const StartNavigator = StackNavigator({
-    Home: {
-        screen: TrendingPage,
-    },
-    RepositoryDetail: {
-        screen: RepositoryDetail
-    }
+const
+    StartNavigator = StackNavigator({
+        Home: {
+            screen: TrendingPage,
+        },
+        RepositoryDetail: {
+            screen: RepositoryDetail
+        }
 
-});
+    });
 
 
 export default StartNavigator;
 
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    tips: {
-        fontSize: 40,
-    },
-    TextInput: {
-        height: 44
-    },
-    redText: {
-        height: 600
-    },
-    button: {
-        borderRadius: 4,
-        padding: 10,
-        marginLeft: 10,
-        marginRight: 10,
-        backgroundColor: '#ccc',
-        borderColor: '#333',
-        borderWidth: 1,
-    },
-    buttonText: {},
-    row: {
-        flexDirection: 'row',
-        borderRadius: 4,
-        padding: 10,
-        marginLeft: 10,
-        marginRight: 10,
-        backgroundColor: '#ccc',
-        borderColor: '#333',
-        borderWidth: 1,
-        alignItems: 'center'
-    }
-});
+const
+    styles = StyleSheet.create({
+        container: {
+            flex: 1,
+        },
+        tips: {
+            fontSize: 40,
+        },
+        TextInput: {
+            height: 44
+        },
+        redText: {
+            height: 600
+        },
+        button: {
+            borderRadius: 4,
+            padding: 10,
+            marginLeft: 10,
+            marginRight: 10,
+            backgroundColor: '#ccc',
+            borderColor: '#333',
+            borderWidth: 1,
+        },
+        buttonText: {},
+        row: {
+            flexDirection: 'row',
+            borderRadius: 4,
+            padding: 10,
+            marginLeft: 10,
+            marginRight: 10,
+            backgroundColor: '#ccc',
+            borderColor: '#333',
+            borderWidth: 1,
+            alignItems: 'center'
+        }
+    });

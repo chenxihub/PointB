@@ -24,8 +24,8 @@ const RootTabs = TabNavigator({
             tabBarLabel: '热度',
             tabBarIcon: ({ tintColor, focused }) => (
                 <Image
-                    source={focused ? require('./res/images/sale_purchase_icon_managemant.png') : require('./res/images/salepayment_icon_finacemanagement.png')}
-                    style={[styles.image]}
+                    source={focused ? require('./res/img/ic_polular.png') : require('./res/img/ic_polular.png')}
+                    style={[styles.image, { tintColor: tintColor }]}
                 />
             ),
         },
@@ -36,8 +36,8 @@ const RootTabs = TabNavigator({
             tabBarLabel: '趋势',
             tabBarIcon: ({ tintColor, focused }) => (
                 <Image
-                    source={focused ? require('./res/images/sale_purchase_icon_managemant.png') : require('./res/images/salepayment_icon_finacemanagement.png')}
-                    style={[styles.image]}
+                    source={focused ? require('./res/img/ic_trending.png') : require('./res/img/ic_trending.png')}
+                    style={[styles.image, { tintColor: tintColor }]}
                 />
             ),
         },
@@ -48,8 +48,8 @@ const RootTabs = TabNavigator({
             tabBarLabel: '收藏',
             tabBarIcon: ({ tintColor, focused }) => (
                 <Image
-                    source={focused ? require('./res/images/sale_purchase_icon_managemant.png') : require('./res/images/salepayment_icon_finacemanagement.png')}
-                    style={[styles.image]}
+                    source={focused ? require('./res/img/ic_favorite.png') : require('./res/img/ic_favorite.png')}
+                    style={[styles.image, { tintColor: tintColor }]}
                 />
             ),
         },
@@ -60,8 +60,8 @@ const RootTabs = TabNavigator({
             tabBarLabel: '我的',
             tabBarIcon: ({ tintColor, focused }) => (
                 <Image
-                    source={focused ? require('./res/images/sale_purchase_icon_managemant.png') : require('./res/images/salepayment_icon_finacemanagement.png')}
-                    style={[styles.image]}
+                    source={focused ? require('./res/img/ic_my.png') : require('./res/img/ic_my.png')}
+                    style={[styles.image, { tintColor: tintColor }]}
                 />
             ),
         },

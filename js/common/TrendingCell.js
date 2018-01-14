@@ -9,15 +9,48 @@ import {
 import HTMLView from 'react-native-htmlview';
 
 export default class TrendingCell extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            isFavorite: this.props.projectModel.isFavorite,
+            favoriteIcon: this.props.projectModel.isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_unstar_transparent.png')
+        };
+    }
+
+    setFavoriteState(isFavorite) {
+        this.setState({
+            isFavorite: isFavorite,
+            favoriteIcon: isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_unstar_transparent.png')
+        })
+    }
+
+    OnPressFavorite() {
+        this.setFavoriteState(!this.state.isFavorite);
+        this.props.onFavorite(this.props.projectModel.item, !this.state.isFavorite)
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setFavoriteState(nextProps.projectModel.isFavorite)
+    }
+
     render() {
-        let description = '<p>' + this.props.data.description + '</p>';
+        let item = this.props.projectModel.item ? this.props.projectModel.item : this.props.projectModel;
+        let description = '<p>' + item.description + '</p>';
+        let favoriteButton = <TouchableOpacity
+            onPress={() => this.OnPressFavorite()}
+        >
+            <Image
+                source={this.state.favoriteIcon}
+                style={[{ width: 16, height: 16, marginTop: 5 }, { tintColor: '#03A9F4' }]}
+            />
+        </TouchableOpacity>;
         return (
             <TouchableOpacity
                 style={styles.container}
                 onPress={this.props.onSelect}
             >
                 <View style={styles.cell_container}>
-                    <Text style={styles.header}>{this.props.data.fullName}</Text>
+                    <Text style={styles.header}>{item.fullName}</Text>
                     <HTMLView
                         value={description}
                         onLinkPress={(url) => {
@@ -29,13 +62,13 @@ export default class TrendingCell extends Component {
                     />
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={styles.description}>Stars : </Text>
-                        <Text style={styles.description}>{this.props.data.starCount}</Text>
-                        <Text style={[styles.description, { marginLeft: 20 }]}>{this.props.data.meta}</Text>
+                        <Text style={styles.description}>{item.starCount}</Text>
+                        <Text style={[styles.description, { marginLeft: 20 }]}>{item.meta}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={styles.title}>Build By : </Text>
-                            {this.props.data.contributors.map((result, i, arr) => {
+                            {item.contributors.map((result, i, arr) => {
                                 return <Image
                                     key={i}
                                     style={{ height: 16, width: 16, borderRadius: 10 }}
@@ -44,12 +77,7 @@ export default class TrendingCell extends Component {
                             })}
 
                         </View>
-                        <View>
-                            <Image
-                                source={require('../../res/images/my/My_coin_icon.png')}
-                                style={{ width: 16, height: 16, marginTop: 5 }}
-                            />
-                        </View>
+                        {favoriteButton}
                     </View>
                 </View>
             </TouchableOpacity>
