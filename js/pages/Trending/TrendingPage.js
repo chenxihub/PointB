@@ -51,6 +51,7 @@ class TrendingPage extends Component {
             languages: [],
             isVisible: false,
             buttonRect: {},
+            timeSpan: timeSpanTextArray[0]
         };
     }
 
@@ -71,6 +72,12 @@ class TrendingPage extends Component {
         this.load();
     }
 
+    onSelectTimeSpan(timeSpan) {
+        this.setState({
+            timeSpan: timeSpan
+        })
+    }
+
     render() {
         let content = this.state.languages.length > 0 ? <ScrollableTabView
             renderTabBar={() => <ScrollableTabBar/>}
@@ -81,7 +88,8 @@ class TrendingPage extends Component {
             {this.state.languages.map((result, i, arr) => {
                 let lan = arr[i];
                 return lan.checked ?
-                    <TrendingTab tabLabel={lan.name} key={i} {...this.props}>{lan.name}</TrendingTab> : null
+                    <TrendingTab tabLabel={lan.name} key={i} {...this.props}
+                                 timeSpan={this.state.timeSpan}>{lan.name}</TrendingTab> : null
             })}
         </ScrollableTabView> : null;
         return (
@@ -92,7 +100,14 @@ class TrendingPage extends Component {
                 />
                 {content}
                 {timeSpanTextArray.map((result, i, arr) => {
-                    return (<TouchableOpacity key={i}><Text>{arr[i].showText}</Text></TouchableOpacity>)
+                    return (<TouchableOpacity
+                        key={i}
+                        onPress={() => this.onSelectTimeSpan(arr[i])}
+                    >
+                        <View
+                            style={styles.row}><Text>{arr[i].showText}</Text>
+                        </View>
+                    </TouchableOpacity>)
                 })}
             </View>
         )
@@ -110,8 +125,20 @@ class TrendingTab extends Component {
         this.dataRepository = new DataRepository(FLAG_STORAGE.flag_trending);
     }
 
-    loadData() {
-        let url = this.getFetchUrl('?since=daily', this.props.tabLabel);
+    componentDidMount() {
+        this.loadData(this.props.timeSpan, true);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.timeSpan !== this.props.timeSpan) {
+            this.loadData(nextProps.timeSpan)
+        }
+
+    }
+
+    loadData(timeSpan, isRefresh) {
+        alert(JSON.stringify(timeSpan));
+        let url = this.getFetchUrl(timeSpan, this.props.tabLabel);
         this.setState({
             isLoading: true
         });
@@ -147,12 +174,13 @@ class TrendingTab extends Component {
             })
     };
 
-    getFetchUrl(timeSpan, category) {
-        return API_URL + category + '?' + timeSpan.searchText
+    onRefreshData() {
+        alert(JSON.stringify(this.props.timeSpan))
+        this.loadData(this.props.timeSpan)
     }
 
-    componentDidMount() {
-        this.loadData();
+    getFetchUrl(timeSpan, category) {
+        return API_URL + category + '?' + timeSpan.searchText
     }
 
 
@@ -184,7 +212,7 @@ class TrendingTab extends Component {
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.isLoading}
-                            onRefresh={() => this.loadData()}
+                            onRefresh={() => this.onRefreshData()}
                             color={['#2196f3']}
                             tintColor={'#2196f3'}
                             title={'Loading...'}
@@ -233,5 +261,16 @@ const styles = StyleSheet.create({
         borderColor: '#333',
         borderWidth: 1,
     },
-    buttonText: {}
+    buttonText: {},
+    row: {
+        flexDirection: 'row',
+        borderRadius: 4,
+        padding: 10,
+        marginLeft: 10,
+        marginRight: 10,
+        backgroundColor: '#ccc',
+        borderColor: '#333',
+        borderWidth: 1,
+        alignItems: 'center'
+    }
 });
