@@ -6,7 +6,8 @@ import {
     RefreshControl,
     DeviceEventEmitter,
     StatusBar,
-    Text
+    Text,
+    Button
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
@@ -26,7 +27,7 @@ let favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
 const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=start';
 
-class PopularHome extends Component {
+export default class PopularPage extends Component {
     static navigationOptions = {
         title: 'Popular',
         //deep:#0288D1  red:#FF5252
@@ -76,6 +77,13 @@ class PopularHome extends Component {
         </ScrollableTabView> : null;
         return (
             <View style={styles.container}>
+                <Button
+                    onPress={() => this.props.navigation.navigate('Chat', {
+                        user: 'Lucy',
+                        ...this.props
+                    })}
+                    title="Chat with Lucy"
+                />
                 <StatusBar
                     backgroundColor="white"
                     barStyle="light-content"
@@ -204,7 +212,7 @@ class PopularTab extends Component {
     }
 
     renderRowData(projectModel) {
-        console.log(projectModel);
+        // console.log(projectModel);
         return (
             <RepositoryCell
                 projectModel={projectModel}
@@ -223,9 +231,11 @@ class PopularTab extends Component {
      */
     onFavorite(item, isFavorite) {
         if (isFavorite) {
-            favoriteDao.saveFavoriteItem(item.id.toString(), JSON.stringify(item))
+            favoriteDao.saveFavoriteItem(item.id.toString(), JSON.stringify(item));
+            this.getFavoriteKeys();
         } else {
-            favoriteDao.removeFavoriteKeys(item.id.toString())
+            favoriteDao.removeFavoriteKeys(item.id.toString());
+            this.getFavoriteKeys();
         }
     }
 
@@ -234,6 +244,7 @@ class PopularTab extends Component {
         navigate('RepositoryDetail', {
             data: projectModel,
             flag: FLAG_STORAGE.flag_popular,
+            ...this.props,
             callback: (value) => {
                 this.setState({
                     isFavoriteChanged: value
@@ -265,18 +276,17 @@ class PopularTab extends Component {
     }
 }
 
-const StartNavigator = StackNavigator({
-    Home: {
-        screen: PopularHome,
-    },
-    RepositoryDetail: {
-        screen: RepositoryDetail
-    }
+// const StartNavigator = StackNavigator({
+//     Home: {
+//         screen: PopularPage,
+//     },
+//     RepositoryDetail: {
+//         screen: RepositoryDetail
+//     }
+// });
 
-});
 
-
-export default StartNavigator;
+// export default StartNavigator;
 
 
 const styles = StyleSheet.create({

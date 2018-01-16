@@ -15,18 +15,19 @@ import {StackNavigator} from 'react-navigation';
 import FavoriteDao from '../expand/FavoriteDao'
 
 let Trending_URL = 'https://github.com/';
-
 export default class RepositoryDetail extends Component {
-    /**
-     * <Button title="收藏"
-     * onPress={navigation.state.params.handleSave ? navigation.state.params.handleSave : () => null/>
-     * @param navigation
-     * @returns {{title: *, headerTintColor: string, headerStyle: {backgroundColor: string}, headerRight: {}}}
-     */
-
+    // static navigationOptions = {
+    //     title: 'Popular',
+    //     //deep:#0288D1  red:#FF5252
+    //     headerTintColor: '#FFFFFF',
+    //     headerStyle: {
+    //         backgroundColor: '#03A9F4'
+    //     }
+    // };
     static navigationOptions = ({ navigation }) => {
         let title = navigation.state.params.data.item.full_name ? navigation.state.params.data.item.full_name
             : navigation.state.params.data.item.fullName;
+
         let headerRight = (
             <TouchableOpacity
                 onPress={navigation.state.params.handleSave ? navigation.state.params.handleSave : () => null}
@@ -38,7 +39,7 @@ export default class RepositoryDetail extends Component {
             </TouchableOpacity>
         );
         let headerLeft = (
-            <View style={{  alignItems: 'center',flexDirection: 'row' }}>
+            <View style={{ alignItems: 'center', flexDirection: 'row' }}>
                 <TouchableOpacity
                     onPress={() => {
                         navigation.state.params.callback(true);
@@ -69,7 +70,8 @@ export default class RepositoryDetail extends Component {
                 </TouchableOpacity>
             </View>
         );
-        return {
+
+        return ({
             title: title,
             headerTintColor: '#FFFFFF',
             headerStyle: {
@@ -77,8 +79,63 @@ export default class RepositoryDetail extends Component {
             },
             headerRight: headerRight,
             headerLeft: headerLeft
-        };
+        })
     };
+    // static navigationOptions = () => {
+    //     let title = this.props.navigation.state.params.data.item.full_name ? this.props.navigation.state.params.data.item.full_name
+    //         : this.props.navigation.state.params.data.item.fullName;
+    //     let headerRight = (
+    //         <TouchableOpacity
+    //             onPress={this.props.navigation.state.params.handleSave ? this.props.navigation.state.params.handleSave : () => null}
+    //         >
+    //             <Image
+    //                 style={{ width: 20, height: 20, marginRight: 10 }}
+    //                 source={this.props.navigation.state.params.data.isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_star_navbar.png')}
+    //             />
+    //         </TouchableOpacity>
+    //     );
+    //     let headerLeft = (
+    //         <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+    //             <TouchableOpacity
+    //                 onPress={() => {
+    //                     navigation.state.params.callback(true);
+    //                     navigation.goBack();
+    //                 }}
+    //             >
+    //                 <View style={{ alignItems: 'center', flexDirection: 'row', backgroundColor: 'transparent', }}>
+    //                     <Image
+    //                         style={[styles.icon, { tintColor: 'white' }]}
+    //                         source={require('../../res/assest/back-icon.png')}
+    //                     />
+    //                     <Text
+    //                         numberOfLines={1}
+    //                         style={{ fontSize: 17, paddingRight: 5, color: 'white' }}
+    //                     >返回</Text>
+    //                 </View>
+    //             </TouchableOpacity>
+    //             <TouchableOpacity
+    //                 onPress={() => {
+    //                     navigation.state.params.callback(true);
+    //                     navigation.goBack();
+    //                 }}
+    //             >
+    //                 <Text
+    //                     numberOfLines={1}
+    //                     style={{ fontSize: 17, paddingRight: 10, color: 'white' }}
+    //                 >关闭</Text>
+    //             </TouchableOpacity>
+    //         </View>
+    //     );
+    //     return {
+    //         title: title,
+    //         headerTintColor: '#FFFFFF',
+    //         headerStyle: {
+    //             backgroundColor: '#03A9F4'
+    //         },
+    //         headerRight: headerRight,
+    //         headerLeft: headerLeft
+    //     };
+    // };
 
     constructor(props) {
         super(props);
@@ -120,7 +177,7 @@ export default class RepositoryDetail extends Component {
     }
 
     componentDidMount() {
-        alert('flag 是：' + JSON.stringify(this.props.navigation.state.params.flag))
+        // alert('flag 是：' + JSON.stringify(this.props.navigation.state.params.flag))
         // We can only set the function after the component has been initialized
         this.props.navigation.setParams({
             handleSave: () => {

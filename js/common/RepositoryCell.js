@@ -57,8 +57,8 @@ export default class RepositoryCell extends Component {
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={styles.title}>Author : </Text>
                             <Image
-                                style={{ height: 16, width: 16, borderRadius: 10 }}
-                                source={{ uri: item.owner.avatar_url }}
+                            style={{ height: 16, width: 16, borderRadius: 10 }}
+                            source={{ uri: item.owner.avatar_url }}
                             />
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>

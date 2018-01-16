@@ -39,7 +39,7 @@ const API_URL = 'https://github.com/trending/';
 let dataRepository = new DataRepository(FLAG_STORAGE.flag_trending);
 let favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 
-class TrendingPage extends Component {
+export default class TrendingPage extends Component {
     static navigationOptions = ({ navigation }) => {
         let title = 'Trending';
         return {
@@ -136,7 +136,7 @@ class TrendingTab extends Component {
     }
 
     componentDidMount() {
-        this.lisener = DeviceEventEmitter.addListener('favoriteChanged_popular', () => {
+        this.lisener = DeviceEventEmitter.addListener('favoriteChanged_trending', () => {
             this.setState({
                 isFavoriteChanged: true
             })
@@ -272,9 +272,11 @@ class TrendingTab extends Component {
      */
     onFavorite(item, isFavorite) {
         if (isFavorite) {
-            favoriteDao.saveFavoriteItem(item.fullName, JSON.stringify(item))
+            favoriteDao.saveFavoriteItem(item.fullName, JSON.stringify(item));
+            this.getFavoriteKeys();
         } else {
-            favoriteDao.removeFavoriteKeys(item.fullName)
+            favoriteDao.removeFavoriteKeys(item.fullName);
+            this.getFavoriteKeys();
         }
     }
 
@@ -314,19 +316,18 @@ class TrendingTab extends Component {
     }
 }
 
-const
-    StartNavigator = StackNavigator({
-        Home: {
-            screen: TrendingPage,
-        },
-        RepositoryDetail: {
-            screen: RepositoryDetail
-        }
-
-    });
-
-
-export default StartNavigator;
+// const StartNavigator = StackNavigator({
+//         Home: {
+//             screen: TrendingPage,
+//         },
+//         RepositoryDetail: {
+//             screen: RepositoryDetail
+//         }
+//
+//     });
+//
+//
+// export default StartNavigator;
 
 
 const

@@ -7,14 +7,14 @@ import {
     Image,
     Button
 } from 'react-native';
-
 import {StackNavigator, TabNavigator} from 'react-navigation';
-
 import Boy from './Boy';
 import PopularPage from './js/pages/PopularPage';
 import AsyncStorageTest from './js/common/AsyncStorageTest';
 import MyPage from './js/pages/my/MyPage';
 import WebViewTest from './WebViewTest'
+import FavoritePage from './js/pages/favorite/FavoritePage'
+import FavoriteHome from './js/pages/favorite/FavoriteHome'
 import TrendingPage from './js/pages/Trending/TrendingPage'
 
 const RootTabs = TabNavigator({
@@ -43,7 +43,7 @@ const RootTabs = TabNavigator({
         },
     },
     Favorite: {
-        screen: WebViewTest,
+        screen: FavoritePage,
         navigationOptions: {
             tabBarLabel: '收藏',
             tabBarIcon: ({ tintColor, focused }) => (

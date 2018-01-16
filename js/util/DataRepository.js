@@ -9,14 +9,14 @@ import {
     AsyncStorage,
 } from 'react-native';
 
-import gitHubTrending from 'GitHubTrending'
+import Trending from 'GitHubTrending'
 
 export let FLAG_STORAGE = { flag_popular: 'popular', flag_trending: 'trending' };
 
 export default class DataRepository {
     constructor(flag) {
         this.flag = flag;
-        if (flag === FLAG_STORAGE.flag_trending) this.trending = new gitHubTrending();
+        if (flag === FLAG_STORAGE.flag_trending) this.trending = new Trending();
     }
 
     /**
@@ -130,7 +130,7 @@ export default class DataRepository {
      */
 
     checkDate(longTime) {
-        return false;
+        // return false;
         let cDate = new Date();
         let tDate = new Date();
         tDate.setTime(longTime);
