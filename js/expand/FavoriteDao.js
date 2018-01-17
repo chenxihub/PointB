@@ -13,7 +13,7 @@ const FAVORITE_KEY_PREFIX = 'favorite_';
 export default class FavoriteDao {
     constructor(flag) {
         this.flag = flag;
-        this.favoriteKey = FAVORITE_KEY_PREFIX;
+        this.favoriteKey = FAVORITE_KEY_PREFIX + flag;
     }
 
     /**

@@ -13,14 +13,15 @@ export default class RepositoryCell extends Component {
         super(props);
         this.state = {
             isFavorite: this.props.projectModel.isFavorite,
-            favoriteIcon: this.props.projectModel.isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_unstar_transparent.png')
+            favoriteIcon: this.props.projectModel.isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_unstar_transparent.png'),
         };
     }
 
     setFavoriteState(isFavorite) {
+        this.props.projectModel.isFavorite = isFavorite;
         this.setState({
             isFavorite: isFavorite,
-            favoriteIcon: isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_unstar_transparent.png')
+            favoriteIcon: isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_unstar_transparent.png'),
         })
     }
 
@@ -30,6 +31,8 @@ export default class RepositoryCell extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        // alert('nextProps:' + JSON.stringify(nextProps))
+        // alert('props:' + JSON.stringify(this.props))
         this.setFavoriteState(nextProps.projectModel.isFavorite)
     }
 
@@ -57,8 +60,8 @@ export default class RepositoryCell extends Component {
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={styles.title}>Author : </Text>
                             <Image
-                            style={{ height: 16, width: 16, borderRadius: 10 }}
-                            source={{ uri: item.owner.avatar_url }}
+                                style={{ height: 16, width: 16, borderRadius: 10 }}
+                                source={{ uri: item.owner.avatar_url }}
                             />
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>

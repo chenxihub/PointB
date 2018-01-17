@@ -6,7 +6,8 @@ import {
     RefreshControl,
     DeviceEventEmitter,
     StatusBar,
-    Text
+    Text,
+    ActivityIndicator
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
@@ -35,28 +36,24 @@ export default class FavoritePage extends Component {
         this.state = {};
     }
 
-    componentDidMount() {
-    }
-
     render() {
-        let content = <ScrollableTabView
-            renderTabBar={() => <ScrollableTabBar/>}
-            tabBarBackgroundColor={'#03A9F4'}
-            tabBarTextStyle={{ color: '#FFFFFF' }}
-            tabBarUnderlineStyle={{ backgroundColor: '#0288D1' }}
-        >
-
-            <FavoritePageTab tabLabel='热门' {...this.props} flag={FLAG_STORAGE.flag_popular}/>
-            <FavoritePageTab tabLabel='趋势' {...this.props} flag={FLAG_STORAGE.flag_trending}/>
-
-        </ScrollableTabView>;
         return (
             <View style={styles.container}>
                 <StatusBar
                     backgroundColor="white"
                     barStyle="light-content"
                 />
-                {content}
+                <ScrollableTabView
+                    renderTabBar={() => <ScrollableTabBar/>}
+                    tabBarBackgroundColor={'#03A9F4'}
+                    tabBarTextStyle={{ color: '#FFFFFF' }}
+                    tabBarUnderlineStyle={{ backgroundColor: '#0288D1' }}
+                >
+
+                    <FavoritePageTab tabLabel='热门' {...this.props} flag={FLAG_STORAGE.flag_popular}/>
+                    <FavoritePageTab tabLabel='趋势' {...this.props} flag={FLAG_STORAGE.flag_trending}/>
+
+                </ScrollableTabView>
             </View>
         )
     }
@@ -65,7 +62,7 @@ export default class FavoritePage extends Component {
 class FavoritePageTab extends Component {
     constructor(props) {
         super(props);
-        this.unFavoriteItems=[];
+        this.unFavoriteItems = [];
         this.state = {
             result: '',
             dataSource: new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 }),
@@ -74,7 +71,7 @@ class FavoritePageTab extends Component {
             isFavoriteChanged: false,
 
         };
-        this.favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
+        this.favoriteDao = new FavoriteDao(this.props.flag);
     }
 
     updateState(dic) {
@@ -113,38 +110,17 @@ class FavoritePageTab extends Component {
         return this.state.dataSource.cloneWithRows(items);
     }
 
-    componentDidMount() {
-        this.loadData(true);
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.loadData(false)
-    }
-
     renderRowData(projectModel) {
-        if (projectModel.item.fullName) {
-            return (
-                <TrendingCell
-                    projectModel={projectModel}
-                    key={projectModel.item.fullName}
-                    onSelect={() => this.onSelect(projectModel)}
-                    onFavorite={(item, isFavorite) => this.onFavorite(item, isFavorite)}
-                    {...this.props}
-                />
-            )
-        } else if (projectModel.item.id) {
-            return (
-                <RepositoryCell
-                    projectModel={projectModel}
-                    key={projectModel.item.id}
-                    onSelect={() => this.onSelect(projectModel)}
-                    onFavorite={(item, isFavorite) => this.onFavorite(item, isFavorite)}
-                    {...this.props}
-                />
-            )
-        } else {
-            return null
-        }
+        let CellComponent = this.props.flag === FLAG_STORAGE.flag_popular ? RepositoryCell : TrendingCell;
+        return (
+            <CellComponent
+                key={this.props.flag === FLAG_STORAGE.flag_popular ? projectModel.item.id : projectModel.item.fullName}
+                onFavorite={(item, isFavorite) => this.onFavorite(item, isFavorite)}
+                isFavorite={true}
+                {...{ navigator }}
+                onSelect={() => this.onSelect(projectModel)}
+                projectModel={projectModel}/>
+        );
 
     }
 
@@ -154,24 +130,14 @@ class FavoritePageTab extends Component {
      * @param isFavorite
      */
     onFavorite(item, isFavorite) {
-        if (item.fullName) {
-            if (isFavorite) {
-                this.favoriteDao.saveFavoriteItem(item.fullName, JSON.stringify(item));
-                this.getFavoriteKeys();
-            } else {
-                this.favoriteDao.removeFavoriteKeys(item.fullName);
-                this.getFavoriteKeys();
-            }
-
-        } else if (item.id) {
-            if (isFavorite) {
-                this.favoriteDao.saveFavoriteItem(item.id.toString(), JSON.stringify(item));
-                this.getFavoriteKeys();
-            } else {
-                this.favoriteDao.removeFavoriteKeys(item.id.toString());
-                this.getFavoriteKeys();
-            }
+        let key = this.props.flag === FLAG_STORAGE.flag_popular ? item.id.toString() : item.fullName;
+        if (isFavorite) {
+            this.favoriteDao.saveFavoriteItem(key, JSON.stringify(item));
+        } else {
+            this.favoriteDao.removeFavoriteKeys(key);
         }
+
+
         ArrayUitls.updateArray(this.unFavoriteItems, item);
         if (this.unFavoriteItems.length > 0) {
             if (this.props.flag === FLAG_STORAGE.flag_popular) {
@@ -217,17 +183,28 @@ class FavoritePageTab extends Component {
             data: projectModel,
             flag: FLAG_STORAGE.flag_popular,
             callback: (value) => {
-                this.setState({
-                    isFavoriteChanged: value
-                })
+                if (value) {
+                    // alert('回调函数带回来的参数：'+value + '将刷新数据');
+                    this.getFavoriteKeys();
+                } else {
+                    // alert('不用刷新数据')
+                }
             }
         });
 
     }
 
+    componentDidMount() {
+        this.loadData(true);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.loadData(false)
+    }
+
     render() {
         return (
-            <View style={styles.redText}>
+            <View style={{ flex: 1 }}>
                 <ListView
                     dataSource={this.state.dataSource}
                     renderRow={(data) => this.renderRowData(data)}
@@ -247,20 +224,6 @@ class FavoritePageTab extends Component {
         )
     }
 }
-//
-// const StartNavigator = StackNavigator({
-//     Home: {
-//         screen: FavoritePageHome,
-//     },
-//     RepositoryDetail: {
-//         screen: RepositoryDetail
-//     }
-//
-// });
-//
-//
-// export default StartNavigator;
-
 
 const styles = StyleSheet.create({
     container: {

@@ -13,8 +13,6 @@ import {
 import Toast, {DURATION} from 'react-native-easy-toast';
 import RootTab from './RootTab';
 
-import PopularPage from './js/pages/PopularPage'
-
 export default class App extends Component<{}> {
     constructor(props) {
         super(props);
