@@ -13,17 +13,11 @@ import {
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import FavoriteDao from '../expand/FavoriteDao'
+import Utils from "../util/Utils";
+import ProjectModel from "../model/ProjectModel";
 
 let Trending_URL = 'https://github.com/';
 export default class RepositoryDetail extends Component {
-    // static navigationOptions = {
-    //     title: 'Popular',
-    //     //deep:#0288D1  red:#FF5252
-    //     headerTintColor: '#FFFFFF',
-    //     headerStyle: {
-    //         backgroundColor: '#03A9F4'
-    //     }
-    // };
     static navigationOptions = ({ navigation }) => {
         let title = navigation.state.params.data.item.full_name ? navigation.state.params.data.item.full_name
             : navigation.state.params.data.item.fullName;
@@ -59,7 +53,7 @@ export default class RepositoryDetail extends Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => {
-                        navigation.state.params.callback(true);
+                        // navigation.state.params.callback(true);
                         navigation.goBack();
                     }}
                 >
@@ -81,61 +75,6 @@ export default class RepositoryDetail extends Component {
             headerLeft: headerLeft
         })
     };
-    // static navigationOptions = () => {
-    //     let title = this.props.navigation.state.params.data.item.full_name ? this.props.navigation.state.params.data.item.full_name
-    //         : this.props.navigation.state.params.data.item.fullName;
-    //     let headerRight = (
-    //         <TouchableOpacity
-    //             onPress={this.props.navigation.state.params.handleSave ? this.props.navigation.state.params.handleSave : () => null}
-    //         >
-    //             <Image
-    //                 style={{ width: 20, height: 20, marginRight: 10 }}
-    //                 source={this.props.navigation.state.params.data.isFavorite ? require('../../res/img/ic_star.png') : require('../../res/img/ic_star_navbar.png')}
-    //             />
-    //         </TouchableOpacity>
-    //     );
-    //     let headerLeft = (
-    //         <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-    //             <TouchableOpacity
-    //                 onPress={() => {
-    //                     navigation.state.params.callback(true);
-    //                     navigation.goBack();
-    //                 }}
-    //             >
-    //                 <View style={{ alignItems: 'center', flexDirection: 'row', backgroundColor: 'transparent', }}>
-    //                     <Image
-    //                         style={[styles.icon, { tintColor: 'white' }]}
-    //                         source={require('../../res/assest/back-icon.png')}
-    //                     />
-    //                     <Text
-    //                         numberOfLines={1}
-    //                         style={{ fontSize: 17, paddingRight: 5, color: 'white' }}
-    //                     >返回</Text>
-    //                 </View>
-    //             </TouchableOpacity>
-    //             <TouchableOpacity
-    //                 onPress={() => {
-    //                     navigation.state.params.callback(true);
-    //                     navigation.goBack();
-    //                 }}
-    //             >
-    //                 <Text
-    //                     numberOfLines={1}
-    //                     style={{ fontSize: 17, paddingRight: 10, color: 'white' }}
-    //                 >关闭</Text>
-    //             </TouchableOpacity>
-    //         </View>
-    //     );
-    //     return {
-    //         title: title,
-    //         headerTintColor: '#FFFFFF',
-    //         headerStyle: {
-    //             backgroundColor: '#03A9F4'
-    //         },
-    //         headerRight: headerRight,
-    //         headerLeft: headerLeft
-    //     };
-    // };
 
     constructor(props) {
         super(props);
@@ -161,11 +100,10 @@ export default class RepositoryDetail extends Component {
     setFavoriteState(isFavorite) {
         this.props.navigation.setParams({
             isFavorite: isFavorite
-        })
+        });
     }
 
     onRightButtonClick() {
-        // alert(JSON.stringify(this.props.navigation.state.params.isFavoriteChanged));
         let projectModel = this.props.navigation.state.params.data;
         this.setFavoriteState(projectModel.isFavorite = !projectModel.isFavorite);
         let key = projectModel.item.fullName ? projectModel.item.fullName : projectModel.item.id.toString();
@@ -177,7 +115,8 @@ export default class RepositoryDetail extends Component {
     }
 
     componentDidMount() {
-        // alert('flag 是：' + JSON.stringify(this.props.navigation.state.params.flag))
+        // alert('isFavorite 是：' + JSON.stringify(this.props.navigation.state.params.data.isFavorite));
+        // alert('isFavoritechange 是：' + JSON.stringify(this.props.navigation.state.params.isFavoriteChanged));
         // We can only set the function after the component has been initialized
         this.props.navigation.setParams({
             handleSave: () => {

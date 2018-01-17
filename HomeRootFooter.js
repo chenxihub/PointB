@@ -10,6 +10,7 @@ import MyPage from './js/pages/my/MyPage';
 import FavoritePage from './js/pages/favorite/FavoritePage'
 import TrendingPage from './js/pages/Trending/TrendingPage'
 import RepositoryDetail from './js/pages/RepositoryDetail'
+import SearchPage from './js/pages/SearchPage'
 import AboutPage from './js/pages/my/About/AboutPage'
 import AboutMePage from './js/pages/my/About/AboutMePage'
 import SortKeyPage from './js/pages/my/SortKeyPage'
@@ -165,6 +166,9 @@ const HomeRootFooter = StackNavigator({
     //Website页面
     Website: {
         screen: WebViewPage
+    },
+    SearchPage: {
+        screen: SearchPage
     },
     //测试页面  子页面中也有TAB栏目的时候
     Chat: {

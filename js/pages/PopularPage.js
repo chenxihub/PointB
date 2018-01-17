@@ -7,7 +7,9 @@ import {
     DeviceEventEmitter,
     StatusBar,
     Text,
-    Button
+    Button,
+    TouchableOpacity,
+    Image
 } from 'react-native';
 import {StackNavigator} from 'react-navigation';
 import ScrollableTabView, {ScrollableTabBar} from 'react-native-scrollable-tab-view';
@@ -28,13 +30,25 @@ const URL = 'https://api.github.com/search/repositories?q=';
 const QUERY_STR = '&sort=start';
 
 export default class PopularPage extends Component {
-    static navigationOptions = {
-        title: 'Popular',
-        //deep:#0288D1  red:#FF5252
-        headerTintColor: '#FFFFFF',
-        headerStyle: {
-            backgroundColor: '#03A9F4'
-        }
+    static navigationOptions = ({ navigation }) => {
+        let headerRight = (
+            <TouchableOpacity
+                onPress={() => {
+                    navigation.navigate('SearchPage', {name:'hello'})
+                }}
+            >
+                <Image
+                    style={{ width: 20, height: 20, marginRight: 10 }}
+                    source={require('../../res/img/ic_search_white_48pt.png')}
+                />
+            </TouchableOpacity>
+        );
+        return ({
+            title: 'Popular',
+            headerTintColor: '#FFFFFF',
+            headerStyle: { backgroundColor: '#03A9F4' },
+            headerRight: headerRight
+        })
     };
 
     constructor(props) {
@@ -45,6 +59,10 @@ export default class PopularPage extends Component {
         };
     }
 
+    onRightButtonClick() {
+        const { navigate } = this.props.navigation;
+        navigate('SearchPage', {})
+    }
 
     load() {
         this.languageDao.fetch()
@@ -59,6 +77,11 @@ export default class PopularPage extends Component {
     }
 
     componentDidMount() {
+        this.props.navigation.setParams({
+            handleSave: () => {
+                this.onRightButtonClick()
+            }
+        });
         this.load();
     }
 
@@ -201,16 +224,6 @@ class PopularTab extends Component {
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (this.state.isFavoriteChanged) {
-            // this.isFavoriteChanged = false;
-            this.setState({
-                isFavoriteChanged: false
-            });
-            this.getFavoriteKeys();
-        }
-    }
-
     renderRowData(projectModel) {
         // console.log(projectModel);
         return (
@@ -232,10 +245,8 @@ class PopularTab extends Component {
     onFavorite(item, isFavorite) {
         if (isFavorite) {
             favoriteDao.saveFavoriteItem(item.id.toString(), JSON.stringify(item));
-            this.getFavoriteKeys();
         } else {
             favoriteDao.removeFavoriteKeys(item.id.toString());
-            this.getFavoriteKeys();
         }
     }
 
@@ -246,9 +257,12 @@ class PopularTab extends Component {
             flag: FLAG_STORAGE.flag_popular,
             ...this.props,
             callback: (value) => {
-                this.setState({
-                    isFavoriteChanged: value
-                })
+                if (value){
+                    // alert('回调函数带回来的参数：'+value + '将刷新数据');
+                    this.getFavoriteKeys();
+                }else {
+                    // alert('不用刷新数据')
+                }
             }
         });
 

@@ -273,10 +273,8 @@ class TrendingTab extends Component {
     onFavorite(item, isFavorite) {
         if (isFavorite) {
             favoriteDao.saveFavoriteItem(item.fullName, JSON.stringify(item));
-            this.getFavoriteKeys();
         } else {
             favoriteDao.removeFavoriteKeys(item.fullName);
-            this.getFavoriteKeys();
         }
     }
 
@@ -286,9 +284,12 @@ class TrendingTab extends Component {
             data: projectModel,
             flag: FLAG_STORAGE.flag_trending,
             callback: (value) => {
-                this.setState({
-                    isFavoriteChanged: value
-                })
+                if (value){
+                    // alert('回调函数带回来的参数：'+value + '将刷新数据');
+                    this.getFavoriteKeys();
+                }else {
+                    // alert('不用刷新数据')
+                }
             }
         });
 
@@ -296,7 +297,7 @@ class TrendingTab extends Component {
 
     render() {
         return (
-            <View style={styles.redText}>
+            <View style={styles.container}>
                 <ListView
                     dataSource={this.state.dataSource}
                     renderRow={(data) => this.renderRowData(data)}
@@ -315,19 +316,6 @@ class TrendingTab extends Component {
         )
     }
 }
-
-// const StartNavigator = StackNavigator({
-//         Home: {
-//             screen: TrendingPage,
-//         },
-//         RepositoryDetail: {
-//             screen: RepositoryDetail
-//         }
-//
-//     });
-//
-//
-// export default StartNavigator;
 
 
 const
