@@ -208,7 +208,6 @@ class FavoritePageTab extends Component {
                 <ListView
                     dataSource={this.state.dataSource}
                     renderRow={(data) => this.renderRowData(data)}
-                    enableEmptySections={true}
                     refreshControl={
                         <RefreshControl
                             refreshing={this.state.isLoading}
